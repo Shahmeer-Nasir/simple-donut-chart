@@ -9,7 +9,7 @@ A lightweight, customizable donut chart library for your JavaScript projects.
 
 * [Installation](#Installation)
 * [Features](#Features)
-* 
+
 ```html
 <body>
   <div id="donut"></div>
