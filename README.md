@@ -17,7 +17,7 @@ A lightweight, customizable donut chart library for your JavaScript projects.
 ```
 
 ```js
-import { createDonutChart } from './index.js';
+import { createDonutChart } from '@shahmeernasir/simple-donut-chart';
 
 const data = [
   { value: 10, label: 'A' },
