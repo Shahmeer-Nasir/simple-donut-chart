@@ -38,7 +38,7 @@ const options = {
 createDonutChart('#donut', data, options);
 ```
 
-[![Simple donut chart](https://i.imgur.com/RYxLeRB.png)]
+![Simple donut chart](https://i.imgur.com/RYxLeRB.png)
 
 ## Installation
 
