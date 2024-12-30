@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <div id="donut"></div>
+    <img src="https://imgur.com/KP6pKwx" width="100px" height="100px" alt="">
+  </div>
+
+  <script type="module">
+    import { createDonutChart } from './index.js';
+  
+    const data = [
+      { value: 25, label: 'A' },
+      { value: 25, label: 'B' },
+      { value: 50, label: 'C' }
+    ];
+  
+    createDonutChart('#donut', data);
+  </script>
+</body>
+</html>

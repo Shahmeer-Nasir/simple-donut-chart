@@ -27,7 +27,9 @@ export function createDonutChart(selector, data, options) {
     const value = item.value;
     const strokeValue = (value / 100) * circumference;
     cumulativeStrokeValue += strokeValue;
+    data[idx].strokeValue = cumulativeStrokeValue;
     const color = options.colors[idx] || getRandomColor();
+    console.log(color);
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', `
@@ -42,10 +44,10 @@ export function createDonutChart(selector, data, options) {
     path.style.transition = `stroke-dasharray ${options.animationDuration}ms ease`;
 
     setTimeout(() => {
-      path.setAttribute('stroke-dasharray', `${cumulativeStrokeValue}, ${circumference}`);
+      path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
     }, 100);
 
-    svg.appendChild(path);
+    svg.prepend(path);
 
     if (options.showLegend) {
       updateLegend(color, value, container);
@@ -73,4 +75,13 @@ function updateLegend(color, value, container) {
   legend.appendChild(colorBox);
   legend.appendChild(text);
   container.appendChild(legend);
+}
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }

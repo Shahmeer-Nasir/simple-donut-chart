@@ -1,6 +1,6 @@
 {
   "name": "@shahmeernasir/simple-donut-chart",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple donut chart in JavaScript",
   "main": "index.js",
   "scripts": {
