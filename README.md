@@ -11,15 +11,25 @@ A lightweight, customizable donut chart library for your JavaScript projects.
 * [Features](#Features)
 
 ```js
-import { createDonutChart } from '@shahmeernasir/simple-donut-chart';
+import { createDonutChart } from './index.js';
 
 const data = [
-  { value: 25, label: 'A' },
+  { value: 10, label: 'A' },
   { value: 25, label: 'B' },
-  { value: 25, label: 'C' }
+  { value: 25, label: 'B' },
+  { value: 40, label: 'C' }
 ];
 
-createDonutChart('#donut', data);
+const options = {
+  radius: 80,
+  strokeWidth: 16,
+  strokeLineCap: 'none',
+  colors: [],
+  showLegend: true,
+  animationDuration: 1000,
+};
+
+createDonutChart('#donut', data, options);
 ```
 
 ## Installation

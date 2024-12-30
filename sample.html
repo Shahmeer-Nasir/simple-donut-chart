@@ -15,12 +15,22 @@
     import { createDonutChart } from './index.js';
   
     const data = [
-      { value: 25, label: 'A' },
+      { value: 10, label: 'A' },
       { value: 25, label: 'B' },
-      { value: 50, label: 'C' }
+      { value: 25, label: 'B' },
+      { value: 40, label: 'C' }
     ];
+    
+  const options = {
+    radius: 80,
+    strokeWidth: 16,
+    strokeLineCap: 'none',
+    colors: [],
+    showLegend: true,
+    animationDuration: 1000,
+  };
   
-    createDonutChart('#donut', data);
+    createDonutChart('#donut', data, options);
   </script>
 </body>
 </html>
