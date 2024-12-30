@@ -5,10 +5,6 @@ A lightweight, customizable donut chart library for your JavaScript projects.
 ---
 [![Simple donut chart](https://i.imgur.com/KP6pKwx.png)](https://www.npmjs.com/package/@shahmeernasir/simple-donut-chart)
 
-**Fast, unopinionated, minimalist web framework for [Node.js](https://nodejs.org).**
-
-**This project has a [Code of Conduct][].**
-
 ## Table of contents
 
 * [Installation](#Installation)
@@ -34,9 +30,6 @@ Installation is done using the
 ```bash
 npm install @shahmeernasir/simple-donut-chart
 ```
-
-Follow [our installing guide](https://www.npmjs.com/package/@shahmeernasir/simple-donut-charten/starter/installing.html)
-for more information.
 
 ## Features
 
