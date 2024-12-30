@@ -14,11 +14,6 @@ A lightweight, customizable donut chart library for your JavaScript projects.
 * [Installation](#Installation)
 * [Features](#Features)
 
-
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Install Size][npm-install-size-image]][npm-install-size-url]
-
-
 ```js
 import { createDonutChart } from '@shahmeernasir/simple-donut-chart';
 
