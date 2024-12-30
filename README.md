@@ -3,7 +3,7 @@
 A lightweight, customizable donut chart library for your JavaScript projects.
 
 ---
-[![Simple donut chart](https://imgur.com/KP6pKwx)](https://www.npmjs.com/package/@shahmeernasir/simple-donut-chart)
+[![Simple donut chart](https://i.imgur.com/KP6pKwx.png)](https://www.npmjs.com/package/@shahmeernasir/simple-donut-chart)
 
 **Fast, unopinionated, minimalist web framework for [Node.js](https://nodejs.org).**
 
