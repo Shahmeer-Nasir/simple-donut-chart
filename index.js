@@ -13,13 +13,21 @@ export function createDonutChart(selector, data, options) {
     animation: 'progress',
     animationDuration: 500,
     padding: 20,
-    inspectable: false,
+    controls: false,
   };
 
   options = { ...defaultOptions, ...options };
   let cumulativeStrokeValue = 0;
-  const svgSize = options.radius * 2 + options.padding;
-  const maxStrokeWidth = options.padding / 2;
+
+  const state = {
+    svg: null,
+    radius: options.radius,
+    padding: options.padding,
+    paths: [],
+    borderVisible: false,
+  };
+
+  const maxStrokeWidth = state.padding / 2;
 
   if (options.strokeWidth > maxStrokeWidth) {
     console.warn(
@@ -28,38 +36,33 @@ export function createDonutChart(selector, data, options) {
     options.strokeWidth = maxStrokeWidth;
   }
 
-  const circumference = 2 * Math.PI * options.radius;
+  const svgSize = state.radius * 2 + state.padding;
+  const circumference = 2 * Math.PI * state.radius;
 
   // Create SVG
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', svgSize);
-  svg.setAttribute('height', svgSize);
-  svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
-  
-  if (options.inspectable) {
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.setAttribute('style', 'border: 1px solid red;');
-  }
-  
+  state.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  state.svg.setAttribute('width', svgSize);
+  state.svg.setAttribute('height', svgSize);
+  state.svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
+  container.appendChild(state.svg);
+
   data.forEach((item, idx) => {
-    const value = item.value;
-    const strokeValue = (value / 100) * circumference;
+    const strokeValue = (item.value / 100) * circumference;
     cumulativeStrokeValue += strokeValue;
     const color = data[idx].colors || getRandomColor();
-
+    
     data[idx].strokeValue = cumulativeStrokeValue;
     data[idx].strokeWidth = Math.min(data[idx].strokeWidth, maxStrokeWidth) || options.strokeWidth;
-
+    
     console.log(color, data[idx].strokeWidth);
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute(
       'd',
-      `M${options.radius + options.padding / 2} ${options.padding / 2}
-      a ${options.radius} ${options.radius} 0 0 1 0 ${options.radius * 2}
-      a ${options.radius} ${options.radius} 0 0 1 0 -${options.radius * 2}`
+      `M${state.radius + state.padding / 2} ${state.padding / 2}
+       a ${state.radius} ${state.radius} 0 1 1 0 ${state.radius * 2}
+       a ${state.radius} ${state.radius} 0 1 1 0 -${state.radius * 2}`
     );
-
     path.setAttribute('stroke-width', "1");
     path.setAttribute('stroke-linecap', options.strokeLineCap);
     path.setAttribute('stroke-dasharray', `0, ${circumference}`);
@@ -67,6 +70,7 @@ export function createDonutChart(selector, data, options) {
     path.setAttribute('fill', 'none');
     path.style.transition = `all ${options.animationDuration}ms ease`;
 
+    
     switch (options.animation) {
       case 'inflate':
         path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
@@ -100,13 +104,49 @@ export function createDonutChart(selector, data, options) {
         break;
     }
 
-    svg.prepend(path);
+    state.paths.push({
+      element: path,
+      strokeWidth: options.strokeWidth,
+      strokeColor: color,
+      strokeValue,
+    });
+
+    state.svg.prepend(path);
+
     if (options.showLegend) {
-      updateLegend(color, value, container);
+      updateLegend(color, item.value, container);
     }
   });
 
-  container.appendChild(svg);
+  // Animation logic
+  // animatePaths(state.paths, circumference, options.animation);
+
+  // Add controls if enabled
+  if (options.controls) {
+    addControls(container, state);
+  }
+}
+
+function animatePaths(paths, circumference, animation) {
+  paths.forEach((pathObj) => {
+    const { element, strokeValue } = pathObj;
+
+    switch (animation) {
+      case 'progress':
+        setTimeout(() => {
+          element.setAttribute('stroke-dasharray', `${strokeValue}, ${circumference}`);
+        }, 100);
+        break;
+      case 'inflate':
+        element.setAttribute('stroke-dasharray', `${strokeValue}, ${circumference}`);
+        break;
+      case 'none':
+        element.setAttribute('stroke-dasharray', `${strokeValue}, ${circumference}`);
+        break;
+      default:
+        break;
+    }
+  });
 }
 
 function updateLegend(color, value, container) {
@@ -129,6 +169,93 @@ function updateLegend(color, value, container) {
   container.appendChild(legend);
 }
 
+function addControls(container, state) {
+  const controlsDiv = document.createElement('div');
+  controlsDiv.style.marginTop = '20px';
+
+  // Border toggle
+  const borderToggle = document.createElement('input');
+  borderToggle.type = 'checkbox';
+  borderToggle.id = 'toggle-border';
+  borderToggle.addEventListener('change', (e) => {
+    state.borderVisible = e.target.checked;
+    state.svg.style.border = state.borderVisible ? '1px solid red' : 'none';
+  });
+
+  const borderLabel = document.createElement('label');
+  borderLabel.htmlFor = 'toggle-border';
+  borderLabel.textContent = 'Show SVG Border';
+  controlsDiv.appendChild(borderToggle);
+  controlsDiv.appendChild(borderLabel);
+
+  // Padding adjuster
+  createRangeInput(controlsDiv, 'Padding', state.padding, 0, 100, 1, (value) => {
+    state.padding = value;
+    updateSVG(state);
+  });
+
+  // Radius adjuster
+  createRangeInput(controlsDiv, 'Radius', state.radius, 10, 100, 1, (value) => {
+    state.radius = value;
+    updateSVG(state);
+  });
+
+  // Stroke width adjuster
+  state.paths.forEach((pathObj, idx) => {
+    createRangeInput(
+      controlsDiv,
+      `Stroke Width for Path ${idx + 1}`,
+      pathObj.strokeWidth,
+      1,
+      state.padding / 2,
+      1,
+      (value) => {
+        pathObj.strokeWidth = value;
+        pathObj.element.setAttribute('stroke-width', value);
+      }
+    );
+  });
+
+  // Stroke color adjuster
+  state.paths.forEach((pathObj, idx) => {
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = pathObj.strokeColor;
+    colorInput.addEventListener('input', (e) => {
+      pathObj.strokeColor = e.target.value;
+      pathObj.element.setAttribute('stroke', e.target.value);
+    });
+
+    const colorLabel = document.createElement('label');
+    colorLabel.textContent = `Stroke Color for Path ${idx + 1}`;
+    controlsDiv.appendChild(colorLabel);
+    controlsDiv.appendChild(colorInput);
+  });
+
+  container.appendChild(controlsDiv);
+}
+
+function createRangeInput(parent, label, value, min, max, step, onChange) {
+  const wrapper = document.createElement('div');
+  const rangeLabel = document.createElement('label');
+  rangeLabel.textContent = label;
+
+  const rangeInput = document.createElement('input');
+  rangeInput.type = 'range';
+  rangeInput.min = min;
+  rangeInput.max = max;
+  rangeInput.step = step;
+  rangeInput.value = value;
+
+  rangeInput.addEventListener('input', (e) => {
+    onChange(Number(e.target.value));
+  });
+
+  wrapper.appendChild(rangeLabel);
+  wrapper.appendChild(rangeInput);
+  parent.appendChild(wrapper);
+}
+
 function getRandomColor() {
   const letters = '0123456789ABCDEF';
   let color = '#';
@@ -136,4 +263,20 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+}
+
+function updateSVG(state) {
+  const svgSize = state.radius * 2 + state.padding;
+  state.svg.setAttribute('width', svgSize);
+  state.svg.setAttribute('height', svgSize);
+  state.svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
+  state.paths.forEach((pathObj) => {
+    const { element } = pathObj;
+    element.setAttribute(
+      'd',
+      `M${state.radius + state.padding / 2} ${state.padding / 2}
+       a ${state.radius} ${state.radius} 0 1 1 0 ${state.radius * 2}
+       a ${state.radius} ${state.radius} 0 1 1 0 -${state.radius * 2}`
+    );
+  });
 }
