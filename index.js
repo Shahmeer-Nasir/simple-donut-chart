@@ -118,9 +118,6 @@ export function createDonutChart(selector, data, options) {
     }
   });
 
-  // Animation logic
-  // animatePaths(state.paths, circumference, options.animation);
-
   // Add controls if enabled
   if (options.controls) {
     addControls(container, state);
@@ -171,7 +168,14 @@ function updateLegend(color, value, container) {
 
 function addControls(container, state) {
   const controlsDiv = document.createElement('div');
+  controlsDiv.style.width = 'fit-content';
+  controlsDiv.style.padding = '10px';
   controlsDiv.style.marginTop = '20px';
+  controlsDiv.style.backgroundColor = '#2e2e2e';
+  controlsDiv.style.color = '#fff';
+  controlsDiv.style.fontFamily = 'Arial, sans-serif';
+  // controlsDiv.style.display = 'flex';
+  // controlsDiv.style.flexDirection = 'column';
 
   // Border toggle
   const borderToggle = document.createElement('input');
