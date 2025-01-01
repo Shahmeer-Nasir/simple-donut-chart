@@ -10,45 +10,97 @@ export function createDonutChart(selector, data, options) {
     strokeLineCap: 'round',
     colors: [],
     showLegend: true,
+    animation: 'progress',
     animationDuration: 500,
+    padding: 20,
+    inspectable: false,
   };
 
   options = { ...defaultOptions, ...options };
+  let cumulativeStrokeValue = 0;
+  const svgSize = options.radius * 2 + options.padding;
+  const maxStrokeWidth = options.padding / 2;
+
+  if (options.strokeWidth > maxStrokeWidth) {
+    console.warn(
+      `Stroke width exceeds the maximum allowed value. Adjusting to ${maxStrokeWidth}.`
+    );
+    options.strokeWidth = maxStrokeWidth;
+  }
+
   const circumference = 2 * Math.PI * options.radius;
 
+  // Create SVG
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', options.radius * 2 + 20);
-  svg.setAttribute('height', options.radius * 2 + 20);
-  svg.setAttribute('viewBox', `0 0 ${options.radius * 2 + 20} ${options.radius * 2 + 20}`);
+  svg.setAttribute('width', svgSize);
+  svg.setAttribute('height', svgSize);
+  svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
   
-  let cumulativeStrokeValue = 0;
-
+  if (options.inspectable) {
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('style', 'border: 1px solid red;');
+  }
+  
   data.forEach((item, idx) => {
     const value = item.value;
     const strokeValue = (value / 100) * circumference;
     cumulativeStrokeValue += strokeValue;
+    const color = data[idx].colors || getRandomColor();
+
     data[idx].strokeValue = cumulativeStrokeValue;
-    const color = options.colors[idx] || getRandomColor();
-    console.log(color);
+    data[idx].strokeWidth = Math.min(data[idx].strokeWidth, maxStrokeWidth) || options.strokeWidth;
+
+    console.log(color, data[idx].strokeWidth);
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `
-      M${options.radius + 10} 10
+    path.setAttribute(
+      'd',
+      `M${options.radius + options.padding / 2} ${options.padding / 2}
       a ${options.radius} ${options.radius} 0 0 1 0 ${options.radius * 2}
-      a ${options.radius} ${options.radius} 0 0 1 0 -${options.radius * 2}`);
-    path.setAttribute('stroke', color);
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke-width', options.strokeWidth);
+      a ${options.radius} ${options.radius} 0 0 1 0 -${options.radius * 2}`
+    );
+
+    path.setAttribute('stroke-width', "1");
     path.setAttribute('stroke-linecap', options.strokeLineCap);
     path.setAttribute('stroke-dasharray', `0, ${circumference}`);
-    path.style.transition = `stroke-dasharray ${options.animationDuration}ms ease`;
+    path.setAttribute('stroke', "transparent");
+    path.setAttribute('fill', 'none');
+    path.style.transition = `all ${options.animationDuration}ms ease`;
 
-    setTimeout(() => {
-      path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
-    }, 100);
+    switch (options.animation) {
+      case 'inflate':
+        path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
+        path.setAttribute('stroke', color);
+        path.setAttribute('fill', 'none');
+
+        setTimeout(() => {
+          path.setAttribute('stroke-width', `${data[idx].strokeWidth}`);
+        }, 100);
+        break;
+      case 'progress':
+        path.setAttribute('stroke-width', `${data[idx].strokeWidth}`);
+        path.setAttribute('stroke', color);
+        path.setAttribute('fill', 'none');
+        
+        setTimeout(() => {
+          path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
+        }, 100);
+        break;
+      case 'none':
+        path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
+        path.setAttribute('stroke-width', `${data[idx].strokeWidth}`);
+        path.setAttribute('stroke', color);
+        path.setAttribute('fill', 'none');
+        break;
+      default:
+        path.setAttribute('stroke-dasharray', `${data[idx].strokeValue}, ${circumference}`);
+        path.setAttribute('stroke-width', `${data[idx].strokeWidth}`);
+        path.setAttribute('stroke', color);
+        path.setAttribute('fill', 'none');
+        break;
+    }
 
     svg.prepend(path);
-
     if (options.showLegend) {
       updateLegend(color, value, container);
     }

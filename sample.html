@@ -14,19 +14,22 @@
     import { createDonutChart } from './index.js';
   
     const data = [
-      { value: 10, label: 'A' },
+      { value: 10, label: 'A', strokeWidth: 100 },
       { value: 25, label: 'B' },
       { value: 25, label: 'B' },
       { value: 40, label: 'C' }
     ];
     
   const options = {
-    radius: 80,
-    strokeWidth: 16,
+    radius: 200,
+    strokeWidth: 90,
     strokeLineCap: 'none',
-    colors: [],
+    // colors: [],
     showLegend: true,
+    // animation: "",
     animationDuration: 1000,
+    padding: 20,
+    inspectable: true,
   };
   
     createDonutChart('#donut', data, options);
